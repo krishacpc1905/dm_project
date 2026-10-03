@@ -38,10 +38,14 @@ h1{font:400 clamp(34px,7vw,60px)/1.1 Georgia,"Times New Roman",serif;text-align:
 #ov{position:fixed;inset:0;z-index:5;background:rgba(5,8,16,.78);backdrop-filter:blur(4px);display:none;place-items:center;padding:18px}
 #ov.on{display:grid;animation:in .4s}#ov .box{background:#121a30;border:1px solid var(--ac);border-radius:16px;padding:28px;max-width:440px;text-align:center;box-shadow:0 0 40px #7cf5c844}
 #ov h2{font:400 34px Georgia,serif;margin:0 0 6px}#ov p{color:var(--mu);margin:6px 0}
+.opt{display:flex;gap:12px 28px;justify-content:center;align-items:center;flex-wrap:wrap;margin:0 0 24px;color:var(--mu)}.og{display:flex;align-items:center;gap:10px}.hid{display:none}
+.seg{display:inline-flex;border:1px solid var(--ln);border-radius:10px;overflow:hidden;background:var(--pn)}.seg button{border:0;border-radius:0;padding:7px 14px;background:transparent}.seg button+button{border-left:1px solid var(--ln)}.seg button.on{background:#7cf5c822;color:var(--tx)}
+.tag{font-size:11px;color:var(--mu);margin-left:6px;border:1px solid var(--ln);border-radius:6px;padding:1px 6px;vertical-align:middle}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
 <canvas id="bg"></canvas><div id="ld">Loading…</div>
 <main id="menu" class="s on"><h1>Web Strategy Games</h1><p class="sub">Two players, one screen. Every board is a graph.</p>
+<div class="opt"><div class="og">Opponent<div class="seg"><button id="o0" class="on" onclick="setOpp(0)">Human</button><button id="o1" onclick="setOpp(1)">Computer</button></div></div><div class="og hid" id="sw">You play<div class="seg"><button id="s0" class="on" onclick="setSide(0)">Red (first)</button><button id="s1" onclick="setSide(1)">Blue</button></div></div></div>
 <div class="cards"><div class="card" onclick="pick(this,'q')"><h2>Quoridor</h2><p>Race across the board while using walls to restrict your opponent's path.</p></div>
 <div class="card" onclick="pick(this,'h')"><h2>Classic Hex</h2><p>Build an unbroken connection between your two target edges.</p></div>
 <div class="card" onclick="pick(this,'sp')"><h2>Special Hex</h2><p>Play Hex with tactical abilities, temporary blocks, shields, removal and a timer.</p></div></div>
@@ -51,12 +55,12 @@ h1{font:400 clamp(34px,7vw,60px)/1.1 Georgia,"Times New Roman",serif;text-align:
 <div id="ov"><div class="box" id="ob"></div></div>
 <script>
 const $=s=>document.querySelector(s),N=11,NM=['Red','Blue'],CL=['var(--r)','var(--b)'],D=[[0,1],[0,-1],[1,0],[-1,0],[-1,1],[1,-1]],K=[[1,0],[-1,0],[0,1],[0,-1]];
-let G={m:'h'},TI;
+let G={m:'h',bot:-1},TI;
 function show(id){document.querySelectorAll('.s').forEach(e=>e.classList.toggle('on',e.id==id))}
-function menu(){clearInterval(TI);$('#ov').classList.remove('on');$('#menu').classList.remove('go');document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));show('menu')}
+function menu(){clearInterval(TI);clearTimeout(BT);$('#ov').classList.remove('on');$('#menu').classList.remove('go');document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));show('menu')}
 function pick(el,m){$('#menu').classList.add('go');el.classList.add('sel');setTimeout(()=>{start(m);menu_reset()},520)}
 function menu_reset(){$('#menu').classList.remove('go');document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'))}
-function info(k){$('#ob').innerHTML=k=='how'?`<h2>How to play</h2><p><b>Quoridor:</b> reach the opposite row. Each turn, move one square or place a wall (2 squares long). Walls may never cut off all paths for a player.</p><p><b>Hex:</b> Red joins left to right, Blue joins top to bottom. Cells connect only along shared sides.</p><p><b>Special Hex:</b> once per game each player can Block an empty cell for 2 turns, Remove an unshielded enemy stone, or Shield one of their own. Using an ability takes your turn. Each player has 5:00 on the clock.</p><button onclick="$('#ov').classList.remove('on')">Close</button>`:`<h2>About</h2><p>A discrete mathematics project. Each board is a graph: cells are vertices, shared sides are edges. Breadth-first search checks Hex connections and Quoridor wall legality.</p><button onclick="$('#ov').classList.remove('on')">Close</button>`;$('#ov').classList.add('on')}
+function info(k){$('#ob').innerHTML=k=='how'?`<h2>How to play</h2><p><b>Quoridor:</b> reach the opposite row. Each turn, move one square or place a wall (2 squares long). Walls may never cut off all paths for a player.</p><p><b>Hex:</b> Red joins left to right, Blue joins top to bottom. Cells connect only along shared sides.</p><p><b>Special Hex:</b> once per game each player can Block an empty cell for 2 turns, Remove an unshielded enemy stone, or Shield one of their own. Using an ability takes your turn. Each player has 5:00 on the clock.</p><p><b>Vs Computer:</b> on the main menu set Opponent to Computer and choose whether you play Red (moves first) or Blue. The computer answers a moment after each of your moves, and Restart keeps your choice.</p><button onclick="$('#ov').classList.remove('on')">Close</button>`:`<h2>About</h2><p>A discrete mathematics project. Each board is a graph: cells are vertices, shared sides are edges. Breadth-first search checks Hex connections and Quoridor wall legality.</p><button onclick="$('#ov').classList.remove('on')">Close</button>`;$('#ov').classList.add('on')}
 /* background graph */
 const cv=$('#bg'),cx=cv.getContext('2d');let ns=[];
 function rs(){cv.width=innerWidth;cv.height=innerHeight;ns=Array.from({length:Math.min(55,innerWidth/18|0)},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,a:Math.random()*6.28}))}
@@ -67,22 +71,22 @@ addEventListener('resize',rs);rs();an();setTimeout(()=>{$('#ld').style.opacity=0
 function toast(m){const t=$('#tt');t.textContent=m;t.classList.remove('on');void t.offsetWidth;t.classList.add('on')}
 function bad(el,m){toast(m);if(el){el.classList.add('sh');setTimeout(()=>el.classList.remove('sh'),300)}}
 const fmt=t=>{t=Math.max(0,Math.ceil(t));return(t/60|0)+':'+String(t%60).padStart(2,'0')};
-function start(m){clearInterval(TI);$('#ov').classList.remove('on');show('game');
-G={m,t:0,over:0,act:null,time:[300,300],ab:[{block:1,remove:1,shield:1},{block:1,remove:1,shield:1}],fx:-1};
-$('#ttl').textContent={q:'Quoridor',h:'Classic Hex',sp:'Special Hex'}[m];
+function start(m){clearInterval(TI);clearTimeout(BT);$('#ov').classList.remove('on');show('game');
+G={m,t:0,over:0,act:null,time:[300,300],ab:[{block:1,remove:1,shield:1},{block:1,remove:1,shield:1}],fx:-1,bot:VS.on?1-VS.side:-1};
+$('#ttl').textContent={q:'Quoridor',h:'Classic Hex',sp:'Special Hex'}[m]+(G.bot>=0?' · vs Computer':'');
 if(m=='q'){G.pw=[{r:8,c:4},{r:0,c:4}];G.H=Array.from({length:8},()=>Array(8).fill(0));G.V=Array.from({length:8},()=>Array(8).fill(0));G.wl=[10,10];G.qm='move';qBuild()}
 else{G.cells=Array(N*N).fill(0);G.bl=Array(N*N).fill(0);G.sh={};hBuild()}
 if(m=='sp')TI=setInterval(()=>{if(G.over)return;G.time[G.t]-=.1;if(G.time[G.t]<=0){G.time[G.t]=0;tm();return fin(1-G.t,'Timeout: opponent ran out of time')}tm()},100);
-render();toast('')}
+render();toast('');botQ()}
 function tm(){if(G.m!='sp')return;[0,1].forEach(i=>{const e=$('#tm'+i);if(e){e.textContent=fmt(G.time[i]);e.className='tm'+(G.time[i]<10?' crit':G.time[i]<30?' low':'')}})}
-function next(){G.t=1-G.t;if(G.bl)G.bl=G.bl.map(v=>v?v-1:0);G.act=null;render()}
+function next(){G.t=1-G.t;if(G.bl)G.bl=G.bl.map(v=>v?v-1:0);G.act=null;render();botQ()}
 function fin(w,why,path){if(G.over)return;G.over=1;clearInterval(TI);render();const d=path?path.length*110+450:500;
 if(path)path.forEach((i,k)=>setTimeout(()=>{const c=$(`#h${i} .st`);c&&c.classList.add('win')},k*110));
 setTimeout(()=>{$('#ob').innerHTML=`<h2 style="color:${CL[w]}">${NM[w].toUpperCase()} WINS!</h2><p>${why}</p><div class="row"><button onclick="start(G.m)">Play Again</button><button onclick="menu()">Main Menu</button></div>`;$('#ov').classList.add('on')},d)}
 function render(){const g=G;
-$('#pls').innerHTML=[0,1].map(i=>`<div class="pl p${i}${g.t==i&&!g.over?' act':''}"><b>${NM[i]}</b>${g.m=='sp'?`<div class="tm" id="tm${i}"></div>`:''}<small>${g.m=='q'?`Walls left: ${g.wl[i]} · reach the ${i?'bottom':'top'} row`:i?'Top ↔ Bottom':'Left ↔ Right'}</small>${g.m=='sp'?['block','remove','shield'].map(k=>`<button class="ab${g.ab[i][k]?'':' used'}${g.act==k&&g.t==i?' on':''}" ${g.t!=i||g.over?'disabled':''} onclick="ab('${k}')">${g.ab[i][k]?k+' ×1':k+' used'}</button>`).join(''):''}</div>`).join('');tm();
-$('#mc').innerHTML=g.m=='q'?`<button class="${g.qm=='move'?'on':''}" onclick="qm('move')">Move pawn</button><button class="${g.qm=='wall'?'on':''}" onclick="qm('wall')">Place wall</button>`:'';
-const hint={block:'Select an empty cell to block',remove:"Select an opponent's stone",shield:'Select one of your stones'}[g.act]||(g.m=='q'?(g.qm=='move'?'Click a highlighted square':'Click between squares to place a wall'):'Place a stone on an empty cell');
+$('#pls').innerHTML=[0,1].map(i=>`<div class="pl p${i}${g.t==i&&!g.over?' act':''}"><b>${NM[i]}</b>${g.bot>=0?`<span class="tag">${i==g.bot?'Computer':'You'}</span>`:''}${g.m=='sp'?`<div class="tm" id="tm${i}"></div>`:''}<small>${g.m=='q'?`Walls left: ${g.wl[i]} · reach the ${i?'bottom':'top'} row`:i?'Top ↔ Bottom':'Left ↔ Right'}</small>${g.m=='sp'?['block','remove','shield'].map(k=>`<button class="ab${g.ab[i][k]?'':' used'}${g.act==k&&g.t==i?' on':''}" ${g.t!=i||g.over||g.bot==i?'disabled':''} onclick="ab('${k}')">${g.ab[i][k]?k+' ×1':k+' used'}</button>`).join(''):''}</div>`).join('');tm();
+$('#mc').innerHTML=g.m=='q'?`<button class="${g.qm=='move'?'on':''}"${bt()?' disabled':''} onclick="qm('move')">Move pawn</button><button class="${g.qm=='wall'?'on':''}"${bt()?' disabled':''} onclick="qm('wall')">Place wall</button>`:'';
+const hint=bt()?'Computer is thinking…':{block:'Select an empty cell to block',remove:"Select an opponent's stone",shield:'Select one of your stones'}[g.act]||(g.m=='q'?(g.qm=='move'?'Click a highlighted square':'Click between squares to place a wall'):'Place a stone on an empty cell');
 $('#st').innerHTML=g.over?'Game over':`<b style="color:${CL[g.t]}">${NM[g.t]}'s turn</b> · ${hint}`;
 g.m=='q'?qRender():hRender();g.fx=-1;g.rmv=null}
 /* hex */
@@ -98,8 +102,8 @@ if(c==0)L(2,3,'#ff5470');if(c==N-1)L(5,0,'#ff5470');if(r==0){L(3,4,'#4aa8ff');L(
 $('#bd').innerHTML=`<svg viewBox="${-w/2-6} ${-s-6} ${w*(1.5*(N-1)+1)+12} ${1.5*s*(N-1)+2*s+12}">${h}<g style="pointer-events:none">${e}</g></svg>`}
 function hRender(){for(let i=0;i<N*N;i++){const v=G.cells[i],[x,y]=G.ctr[i],f=i==G.fx?' pop':'',el=$('#h'+i);
 el.innerHTML=`<polygon points="${G.pts[i]}" class="${G.bl[i]?'bk':''}"/>`+(v?`<circle cx="${x}" cy="${y}" r="13" class="st s${v}${f}"/>`:'')+(G.rmv&&G.rmv.i==i?`<circle cx="${x}" cy="${y}" r="13" class="st s${G.rmv.p} out"/>`:'')+(G.sh[i]?`<circle cx="${x}" cy="${y}" r="17" class="st shd${f}"/>`:'')+(G.bl[i]?`<text x="${x}" y="${y+4}" class="bt">${G.bl[i]}</text>`:'')}}
-function ab(k){if(G.over)return;if(!G.ab[G.t][k])return bad(null,`No ${k[0].toUpperCase()+k.slice(1)} uses remaining`);G.act=G.act==k?null:k;render()}
-function hClick(i){if(G.over)return;const p=G.t+1,o=3-p,a=G.act,v=G.cells[i],A=G.ab[G.t],el=$('#h'+i);let e='',pl=0;
+function ab(k){if(G.over||lk())return;if(!G.ab[G.t][k])return bad(null,`No ${k[0].toUpperCase()+k.slice(1)} uses remaining`);G.act=G.act==k?null:k;render()}
+function hClick(i){if(G.over||lk())return;const p=G.t+1,o=3-p,a=G.act,v=G.cells[i],A=G.ab[G.t],el=$('#h'+i);let e='',pl=0;
 if(!a){if(v)e='Cell already occupied';else if(G.bl[i])e='That cell is blocked';else{G.cells[i]=p;pl=1}}
 else if(a=='block'){if(v)e='Block needs an empty cell';else if(G.bl[i])e='Cell is already blocked';else{G.bl[i]=3;A.block=0}}
 else if(a=='remove'){if(v!=o)e=v?'You cannot remove your own stone':'Select an opponent stone';else if(G.sh[i])e='This stone is shielded';else{G.cells[i]=0;A.remove=0;G.rmv={i,p:o}}}
@@ -123,14 +127,60 @@ function qBuild(){let h='';for(let r=0;r<9;r++)for(let c=0;c<9;c++)h+=`<div clas
 for(let r=0;r<8;r++)for(let c=0;c<9;c++)h+=`<i class="sp" style="grid-area:${2*r+2}/${2*c+1}" onmouseenter="gh('H',${r},${Math.min(c,7)})" onclick="qc('H',${r},${Math.min(c,7)})"></i>`;
 for(let r=0;r<9;r++)for(let c=0;c<8;c++)h+=`<i class="sp" style="grid-area:${2*r+1}/${2*c+2}" onmouseenter="gh('V',${Math.min(r,7)},${c})" onclick="qc('V',${Math.min(r,7)},${c})"></i>`;
 $('#bd').innerHTML=`<div class="qb" id="qb" onmouseleave="$('#gh').style.display='none'">${h}<b class="w gh" id="gh" style="display:none"></b></div>`}
-function qRender(){const m=G.qm=='move'&&!G.over?moves(G.t):[];$('#qb').classList.toggle('wm',G.qm=='wall');
+function qRender(){const m=G.qm=='move'&&!G.over&&!bt()?moves(G.t):[];$('#qb').classList.toggle('wm',G.qm=='wall');
 for(let r=0;r<9;r++)for(let c=0;c<9;c++){const e=$(`#c${r}${c}`),p=G.pw.findIndex(q=>q.r==r&&q.c==c);e.className='qc'+(m.some(x=>x[0]==r&&x[1]==c)?' mv':'');e.innerHTML=p>=0?`<div class="pw" style="background:${CL[p]};box-shadow:0 0 10px ${CL[p]}"></div>`:''}
 document.querySelectorAll('#qb .w:not(.gh)').forEach(e=>e.remove());let h='';
 for(const o of['H','V'])G[o].forEach((row,r)=>row.forEach((v,c)=>{if(v)h+=`<b class="w" style="grid-area:${ga(o,r,c)}"></b>`}));$('#qb').insertAdjacentHTML('beforeend',h);$('#gh').style.display='none'}
-function qm(m){G.qm=m;render()}
-function gh(o,r,c){if(G.qm!='wall'||G.over)return;const e=$('#gh');e.style.display='block';e.style.gridArea=ga(o,r,c);e.classList.toggle('bad',!!canWall(o,r,c))}
-function qc(k,a,b){if(G.over)return;
+function qm(m){if(lk())return;G.qm=m;render()}
+function gh(o,r,c){if(G.qm!='wall'||G.over||bt())return;const e=$('#gh');e.style.display='block';e.style.gridArea=ga(o,r,c);e.classList.toggle('bad',!!canWall(o,r,c))}
+function qc(k,a,b){if(G.over||lk())return;
 if(k=='m'){if(G.qm!='move')return;if(!moves(G.t).some(m=>m[0]==a&&m[1]==b))return bad($(`#c${a}${b}`),'Invalid move: choose a highlighted square');
 G.pw[G.t]={r:a,c:b};if(a==(G.t?8:0)){qRender();return fin(G.t,'Reached the far side of the board')}return next()}
 if(G.qm!='wall')return;const e=canWall(k,a,b);if(e)return bad($('#gh'),e);G[k][a][b]=1;G.wl[G.t]--;next()}
+/* computer opponent */
+const VS={on:0,side:0};let BT=0,BF=0;
+const NB=Array.from({length:N*N},(_,i)=>nb(i)),rnd=a=>a[Math.random()*a.length|0],cl=x=>Math.min(x,60);
+const bt=()=>G.bot>=0&&G.t==G.bot&&!G.over;
+function lk(){if(bt()&&!BF){toast('Wait for the computer to move');return 1}return 0}
+function setOpp(v){VS.on=v;$('#o0').classList.toggle('on',!v);$('#o1').classList.toggle('on',!!v);$('#sw').classList.toggle('hid',!v)}
+function setSide(v){VS.side=v;$('#s0').classList.toggle('on',!v);$('#s1').classList.toggle('on',!!v)}
+function botQ(){clearTimeout(BT);if(bt())BT=setTimeout(botGo,G.m=='q'?650:750)}
+function botGo(){if(!bt())return;const t0=G.t;let er=0;BF=1;
+try{G.m=='q'?qBot():hBot()}catch(e){console.error(e);er=1}finally{BF=0}
+if(G.over)return;
+if(er||G.t==t0){G.act=null;G.bot=-1;render();toast('The computer got stuck, so both sides are manual now');return}
+toast('')}
+/* quoridor bot: BFS distance field from the goal row */
+function dmap(t){const g=t?8:0,d=Array(81).fill(-1),q=[];for(let c=0;c<9;c++){d[g*9+c]=0;q.push([g,c])}
+for(let h=0;h<q.length;h++){const[r,c]=q[h];for(const[a,b]of K)if(!blk(r,c,a,b)){const k=(r+a)*9+c+b;if(d[k]<0){d[k]=d[r*9+c]+1;q.push([r+a,c+b])}}}return d}
+const pd=(d,t)=>d[G.pw[t].r*9+G.pw[t].c];
+function qWall(t,u,me,op,any){let best=[],bs=any?-1e9:0;
+for(const o of['H','V'])for(let r=0;r<8;r++)for(let c=0;c<8;c++){if(canWall(o,r,c))continue;
+G[o][r][c]=1;const s=(pd(dmap(u),u)-op)-(pd(dmap(t),t)-me);G[o][r][c]=0;
+if(s>bs){bs=s;best=[[o,r,c]]}else if(s==bs&&(any||s>0))best.push([o,r,c])}
+return best.length?rnd(best):null}
+function qFix(){if(!G.over&&G.qm!='move'){G.qm='move';render()}}
+function qBot(){const t=G.t,u=1-t,dm=dmap(t),me=pd(dm,t),op=pd(dmap(u),u);
+if(G.wl[t]>0&&op<me){const w=qWall(t,u,me,op,0);if(w){G.qm='wall';qc(w[0],w[1],w[2]);return qFix()}}
+let b=[],bd=1e9;for(const[r,c]of moves(t)){const d=dm[r*9+c];if(d<0)continue;if(d<bd){bd=d;b=[[r,c]]}else if(d==bd)b.push([r,c])}
+if(b.length){const[r,c]=rnd(b);G.qm='move';qc('m',r,c);return qFix()}
+const w=G.wl[t]>0&&qWall(t,u,me,op,1);if(w){G.qm='wall';qc(w[0],w[1],w[2]);qFix()}}
+/* hex bots: 0-1 shortest connection (own stone 0, empty 1, enemy/blocked impassable); ov=[cell,value] what-if override, -1 = blocked */
+function hDist(p,ov){const I=1e9,d=Array(N*N).fill(I),q=[],cs=i=>{const v=ov&&ov[0]==i?ov[1]:G.cells[i];return v==p?0:(v||G.bl[i])?I:1};
+for(let k=0;k<N;k++){const i=p==1?k*N:k,w=cs(i);if(w<I){d[i]=w;q.push(i)}}
+for(let h=0;h<q.length;h++){const i=q[h];for(const j of NB[i]){const w=cs(j);if(w<I&&d[i]+w<d[j]){d[j]=d[i]+w;q.push(j)}}}
+let b=I;for(let k=0;k<N;k++){const i=p==1?k*N+N-1:N*(N-1)+k;if(d[i]<b)b=d[i]}return b}
+function sAbil(t,p,o){const A=G.ab[t];if(!(A.block||A.remove||A.shield))return null;
+const md=cl(hDist(p)),od=cl(hDist(o));if(Math.random()>(od<=3&&od<=md?.7:.2))return null;
+const ops=[],best=(ok,f)=>{let bi=null,bs=0;for(let x=0;x<N*N;x++){if(!ok(x))continue;const s=f(x);if(s>bs||(s==bs&&s>0&&Math.random()<.4)){bs=s;bi=x}}return bi};
+if(A.block){const x=best(x=>!G.cells[x]&&!G.bl[x],x=>cl(hDist(o,[x,-1]))-od-(cl(hDist(p,[x,-1]))-md));if(x!=null)ops.push({k:'block',i:x})}
+if(A.remove){const x=best(x=>G.cells[x]==o&&!G.sh[x],x=>cl(hDist(o,[x,0]))-od);if(x!=null)ops.push({k:'remove',i:x})}
+if(A.shield&&G.ab[1-t].remove){const x=best(x=>G.cells[x]==p&&!G.sh[x],x=>cl(hDist(p,[x,0]))-md);if(x!=null)ops.push({k:'shield',i:x})}
+return ops.length?rnd(ops):null}
+function hBot(){const t=G.t,p=t+1,o=3-p;
+if(G.m=='sp'){const a=sAbil(t,p,o);if(a){G.act=a.k;return hClick(a.i)}}
+G.act=null;const cur=hDist(p),L=[];let bi=-1,bs=-1e18;
+for(let i=0;i<N*N;i++){if(G.cells[i]||G.bl[i])continue;L.push(i);const d=hDist(p,[i,p]);if(d>=cur)continue;
+const s=-d*1000+cl(hDist(o,[i,p]))*10+(10-Math.abs((i/N|0)-5)-Math.abs(i%N-5))*.5+Math.random()*2;if(s>bs){bs=s;bi=i}}
+if(bi<0&&L.length)bi=rnd(L);if(bi>=0)hClick(bi)}
 </script></body></html>
