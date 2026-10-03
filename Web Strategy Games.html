@@ -1,0 +1,136 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Web Strategy Games</title>
+<style>
+:root{--bg:#090d18;--pn:rgba(24,32,56,.72);--ln:#2a3558;--tx:#e8ecf8;--mu:#8a94b3;--r:#ff5470;--b:#4aa8ff;--ac:#7cf5c8;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;overflow-x:hidden}
+button{font:inherit;color:inherit;background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:8px 14px;cursor:pointer;transition:.2s}
+button:hover:not(:disabled){border-color:var(--ac);box-shadow:0 0 12px #7cf5c844}button:disabled{opacity:.4;cursor:default}
+#bg{position:fixed;inset:0;z-index:0}.s{display:none;position:relative;z-index:1;padding:18px;max-width:920px;margin:auto;animation:in .5s}.s.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(12px)}}
+#ld{position:fixed;inset:0;z-index:9;background:var(--bg);display:grid;place-items:center;font-family:Georgia,serif;font-size:22px;letter-spacing:.1em;transition:opacity .5s}
+h1{font:400 clamp(34px,7vw,60px)/1.1 Georgia,"Times New Roman",serif;text-align:center;margin:7vh 0 8px;text-shadow:0 0 28px #7cf5c866}
+.sub{text-align:center;color:var(--mu);margin:0 0 30px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.card{background:var(--pn);backdrop-filter:blur(10px);border:1px solid var(--ln);border-radius:14px;padding:22px;cursor:pointer;transition:.35s}
+.card:hover{transform:scale(1.04);border-color:var(--ac);box-shadow:0 0 26px #7cf5c833}.card h2{margin:0 0 8px;font:400 24px Georgia,serif}.card p{margin:0;color:var(--mu)}
+.go .card{opacity:0;transform:scale(.88);pointer-events:none}.go .card.sel{opacity:1;transform:scale(1.15)}
+.row{display:flex;gap:10px;justify-content:center;margin-top:24px;flex-wrap:wrap}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px}.bar b{font:400 20px Georgia,serif}
+#st{text-align:center;margin:12px 0 4px;min-height:24px}#tt{text-align:center;min-height:22px;color:#ffb454}#tt.on{animation:in .3s}
+.pls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:6px 0}
+.pl{flex:1;min-width:150px;max-width:330px;background:var(--pn);border:1px solid var(--ln);border-radius:12px;padding:10px 14px;opacity:.6;transition:.35s}
+.pl.act{opacity:1;transform:translateY(-3px)}.pl.act.p0{border-color:var(--r);box-shadow:0 0 16px #ff547044}.pl.act.p1{border-color:var(--b);box-shadow:0 0 16px #4aa8ff44}
+.p0 b{color:var(--r)}.p1 b{color:var(--b)}.pl small{color:var(--mu);display:block}
+.tm{font:600 26px ui-monospace,Menlo,monospace}.tm.low{color:#ffb454;animation:pl 1s infinite}.tm.crit{color:var(--r);animation:pl .5s infinite}@keyframes pl{50%{opacity:.55}}
+.ab{margin:4px 4px 0 0;padding:4px 10px;text-transform:capitalize}.ab.on{border-color:var(--ac);background:#7cf5c822}.ab.used{text-decoration:line-through}
+.mc{display:flex;gap:8px;justify-content:center;margin:6px 0}.mc .on{border-color:var(--ac);background:#7cf5c822}
+#bd{display:flex;justify-content:center;margin-top:8px}#bd svg{width:100%;max-width:760px;height:auto}
+.hx{cursor:pointer;transform-box:fill-box;transform-origin:center;animation:gr .45s both}@keyframes gr{from{opacity:0;transform:scale(.8)}}
+.hx polygon{fill:#121a30;stroke:#2f3b63;stroke-width:1.5;transition:.2s}.hx:hover polygon{fill:#1e2a4a}.hx polygon.bk{fill:#3b2a14;stroke:#ffb454;stroke-dasharray:3 2}
+.st{transform-box:fill-box;transform-origin:center}.s1{fill:var(--r)}.s2{fill:var(--b)}.pop{animation:po .45s}@keyframes po{0%{transform:scale(.6)}60%{transform:scale(1.2);filter:drop-shadow(0 0 7px #fff)}}
+.out{animation:ou .45s forwards}@keyframes ou{to{transform:scale(.1);opacity:0}}.win{filter:drop-shadow(0 0 8px #fff);animation:po .5s}
+.shd{fill:none;stroke:var(--ac);stroke-width:2.5;filter:drop-shadow(0 0 4px var(--ac))}.shd.pop{animation:sp .6s}@keyframes sp{from{transform:scale(1.7);opacity:0}}
+.bt{fill:#ffb454;font:700 11px system-ui;text-anchor:middle;pointer-events:none}.sh{animation:sk .28s}@keyframes sk{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.qb{--c:min(8.4vw,46px);--g:min(2.4vw,12px);display:grid;grid-template-columns:repeat(8,var(--c) var(--g)) var(--c);grid-template-rows:repeat(8,var(--c) var(--g)) var(--c);padding:14px;background:var(--pn);border:1px solid var(--ln);border-radius:12px}
+.qc{background:#141c33;border-radius:5px;display:grid;place-items:center;animation:gr .4s both}.qc.mv{background:#7cf5c833;cursor:pointer;box-shadow:inset 0 0 0 2px var(--ac)}
+.pw{width:72%;height:72%;border-radius:50%;animation:po .5s}.sp{display:block}.wm .sp:hover{cursor:pointer}
+.w{background:#ffb454;border-radius:3px;pointer-events:none;box-shadow:0 0 8px #ffb45466}.gh{opacity:.55}.gh.bad{background:var(--r)}
+#ov{position:fixed;inset:0;z-index:5;background:rgba(5,8,16,.78);backdrop-filter:blur(4px);display:none;place-items:center;padding:18px}
+#ov.on{display:grid;animation:in .4s}#ov .box{background:#121a30;border:1px solid var(--ac);border-radius:16px;padding:28px;max-width:440px;text-align:center;box-shadow:0 0 40px #7cf5c844}
+#ov h2{font:400 34px Georgia,serif;margin:0 0 6px}#ov p{color:var(--mu);margin:6px 0}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<canvas id="bg"></canvas><div id="ld">Loading…</div>
+<main id="menu" class="s on"><h1>Web Strategy Games</h1><p class="sub">Two players, one screen. Every board is a graph.</p>
+<div class="cards"><div class="card" onclick="pick(this,'q')"><h2>Quoridor</h2><p>Race across the board while using walls to restrict your opponent's path.</p></div>
+<div class="card" onclick="pick(this,'h')"><h2>Classic Hex</h2><p>Build an unbroken connection between your two target edges.</p></div>
+<div class="card" onclick="pick(this,'sp')"><h2>Special Hex</h2><p>Play Hex with tactical abilities, temporary blocks, shields, removal and a timer.</p></div></div>
+<div class="row"><button onclick="info('how')">How to play</button><button onclick="info('about')">About project</button></div></main>
+<main id="game" class="s"><div class="bar"><button onclick="menu()">‹ Menu</button><b id="ttl"></b><button onclick="start(G.m)">Restart</button></div>
+<div id="st"></div><div class="pls" id="pls"></div><div class="mc" id="mc"></div><div id="tt"></div><div id="bd"></div></main>
+<div id="ov"><div class="box" id="ob"></div></div>
+<script>
+const $=s=>document.querySelector(s),N=11,NM=['Red','Blue'],CL=['var(--r)','var(--b)'],D=[[0,1],[0,-1],[1,0],[-1,0],[-1,1],[1,-1]],K=[[1,0],[-1,0],[0,1],[0,-1]];
+let G={m:'h'},TI;
+function show(id){document.querySelectorAll('.s').forEach(e=>e.classList.toggle('on',e.id==id))}
+function menu(){clearInterval(TI);$('#ov').classList.remove('on');$('#menu').classList.remove('go');document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'));show('menu')}
+function pick(el,m){$('#menu').classList.add('go');el.classList.add('sel');setTimeout(()=>{start(m);menu_reset()},520)}
+function menu_reset(){$('#menu').classList.remove('go');document.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel'))}
+function info(k){$('#ob').innerHTML=k=='how'?`<h2>How to play</h2><p><b>Quoridor:</b> reach the opposite row. Each turn, move one square or place a wall (2 squares long). Walls may never cut off all paths for a player.</p><p><b>Hex:</b> Red joins left to right, Blue joins top to bottom. Cells connect only along shared sides.</p><p><b>Special Hex:</b> once per game each player can Block an empty cell for 2 turns, Remove an unshielded enemy stone, or Shield one of their own. Using an ability takes your turn. Each player has 5:00 on the clock.</p><button onclick="$('#ov').classList.remove('on')">Close</button>`:`<h2>About</h2><p>A discrete mathematics project. Each board is a graph: cells are vertices, shared sides are edges. Breadth-first search checks Hex connections and Quoridor wall legality.</p><button onclick="$('#ov').classList.remove('on')">Close</button>`;$('#ov').classList.add('on')}
+/* background graph */
+const cv=$('#bg'),cx=cv.getContext('2d');let ns=[];
+function rs(){cv.width=innerWidth;cv.height=innerHeight;ns=Array.from({length:Math.min(55,innerWidth/18|0)},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,a:Math.random()*6.28}))}
+function an(){cx.clearRect(0,0,cv.width,cv.height);ns.forEach(n=>{n.x=(n.x+Math.cos(n.a)*.25+cv.width)%cv.width;n.y=(n.y+Math.sin(n.a)*.25+cv.height)%cv.height});
+for(let i=0;i<ns.length;i++){for(let j=i+1;j<ns.length;j++){const d=Math.hypot(ns[i].x-ns[j].x,ns[i].y-ns[j].y);if(d<150){cx.strokeStyle=`rgba(124,245,200,${(1-d/150)*.22})`;cx.beginPath();cx.moveTo(ns[i].x,ns[i].y);cx.lineTo(ns[j].x,ns[j].y);cx.stroke()}}cx.fillStyle='rgba(124,245,200,.5)';cx.fillRect(ns[i].x-1.5,ns[i].y-1.5,3,3)}requestAnimationFrame(an)}
+addEventListener('resize',rs);rs();an();setTimeout(()=>{$('#ld').style.opacity=0;setTimeout(()=>$('#ld').remove(),500)},1100);
+/* shared flow */
+function toast(m){const t=$('#tt');t.textContent=m;t.classList.remove('on');void t.offsetWidth;t.classList.add('on')}
+function bad(el,m){toast(m);if(el){el.classList.add('sh');setTimeout(()=>el.classList.remove('sh'),300)}}
+const fmt=t=>{t=Math.max(0,Math.ceil(t));return(t/60|0)+':'+String(t%60).padStart(2,'0')};
+function start(m){clearInterval(TI);$('#ov').classList.remove('on');show('game');
+G={m,t:0,over:0,act:null,time:[300,300],ab:[{block:1,remove:1,shield:1},{block:1,remove:1,shield:1}],fx:-1};
+$('#ttl').textContent={q:'Quoridor',h:'Classic Hex',sp:'Special Hex'}[m];
+if(m=='q'){G.pw=[{r:8,c:4},{r:0,c:4}];G.H=Array.from({length:8},()=>Array(8).fill(0));G.V=Array.from({length:8},()=>Array(8).fill(0));G.wl=[10,10];G.qm='move';qBuild()}
+else{G.cells=Array(N*N).fill(0);G.bl=Array(N*N).fill(0);G.sh={};hBuild()}
+if(m=='sp')TI=setInterval(()=>{if(G.over)return;G.time[G.t]-=.1;if(G.time[G.t]<=0){G.time[G.t]=0;tm();return fin(1-G.t,'Timeout: opponent ran out of time')}tm()},100);
+render();toast('')}
+function tm(){if(G.m!='sp')return;[0,1].forEach(i=>{const e=$('#tm'+i);if(e){e.textContent=fmt(G.time[i]);e.className='tm'+(G.time[i]<10?' crit':G.time[i]<30?' low':'')}})}
+function next(){G.t=1-G.t;if(G.bl)G.bl=G.bl.map(v=>v?v-1:0);G.act=null;render()}
+function fin(w,why,path){if(G.over)return;G.over=1;clearInterval(TI);render();const d=path?path.length*110+450:500;
+if(path)path.forEach((i,k)=>setTimeout(()=>{const c=$(`#h${i} .st`);c&&c.classList.add('win')},k*110));
+setTimeout(()=>{$('#ob').innerHTML=`<h2 style="color:${CL[w]}">${NM[w].toUpperCase()} WINS!</h2><p>${why}</p><div class="row"><button onclick="start(G.m)">Play Again</button><button onclick="menu()">Main Menu</button></div>`;$('#ov').classList.add('on')},d)}
+function render(){const g=G;
+$('#pls').innerHTML=[0,1].map(i=>`<div class="pl p${i}${g.t==i&&!g.over?' act':''}"><b>${NM[i]}</b>${g.m=='sp'?`<div class="tm" id="tm${i}"></div>`:''}<small>${g.m=='q'?`Walls left: ${g.wl[i]} · reach the ${i?'bottom':'top'} row`:i?'Top ↔ Bottom':'Left ↔ Right'}</small>${g.m=='sp'?['block','remove','shield'].map(k=>`<button class="ab${g.ab[i][k]?'':' used'}${g.act==k&&g.t==i?' on':''}" ${g.t!=i||g.over?'disabled':''} onclick="ab('${k}')">${g.ab[i][k]?k+' ×1':k+' used'}</button>`).join(''):''}</div>`).join('');tm();
+$('#mc').innerHTML=g.m=='q'?`<button class="${g.qm=='move'?'on':''}" onclick="qm('move')">Move pawn</button><button class="${g.qm=='wall'?'on':''}" onclick="qm('wall')">Place wall</button>`:'';
+const hint={block:'Select an empty cell to block',remove:"Select an opponent's stone",shield:'Select one of your stones'}[g.act]||(g.m=='q'?(g.qm=='move'?'Click a highlighted square':'Click between squares to place a wall'):'Place a stone on an empty cell');
+$('#st').innerHTML=g.over?'Game over':`<b style="color:${CL[g.t]}">${NM[g.t]}'s turn</b> · ${hint}`;
+g.m=='q'?qRender():hRender();g.fx=-1;g.rmv=null}
+/* hex */
+function nb(i){const r=i/N|0,c=i%N;return D.map(([a,b])=>[r+a,c+b]).filter(([a,b])=>a>=0&&b>=0&&a<N&&b<N).map(([a,b])=>a*N+b)}
+function hexWin(p){const par={},q=[];for(let k=0;k<N;k++){const i=p==1?k*N:k;if(G.cells[i]==p){par[i]=-1;q.push(i)}}
+for(const i of q){if(p==1?i%N==N-1:i>=N*(N-1)){const path=[];for(let x=i;x!=-1;x=par[x])path.push(x);return path.reverse()}
+for(const j of nb(i))if(G.cells[j]==p&&!(j in par)){par[j]=i;q.push(j)}}return null}
+function hBuild(){const s=22,w=Math.sqrt(3)*s;let h='',e='';G.pts=[];G.ctr=[];
+for(let r=0;r<N;r++)for(let c=0;c<N;c++){const x=w*(c+r/2),y=1.5*s*r,v=[0,1,2,3,4,5].map(k=>{const a=Math.PI/180*(30+60*k);return[x+s*Math.cos(a),y+s*Math.sin(a)]});G.pts.push(v.map(p=>p.map(n=>n.toFixed(1)).join()).join(' '));G.ctr.push([x,y]);
+h+=`<g class="hx" id="h${r*N+c}" style="animation-delay:${c*40}ms" onclick="hClick(${r*N+c})"></g>`;
+const L=(a,b,col)=>e+=`<line x1="${v[a][0]}" y1="${v[a][1]}" x2="${v[b][0]}" y2="${v[b][1]}" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`;
+if(c==0)L(2,3,'#ff5470');if(c==N-1)L(5,0,'#ff5470');if(r==0){L(3,4,'#4aa8ff');L(4,5,'#4aa8ff')}if(r==N-1){L(0,1,'#4aa8ff');L(1,2,'#4aa8ff')}}
+$('#bd').innerHTML=`<svg viewBox="${-w/2-6} ${-s-6} ${w*(1.5*(N-1)+1)+12} ${1.5*s*(N-1)+2*s+12}">${h}<g style="pointer-events:none">${e}</g></svg>`}
+function hRender(){for(let i=0;i<N*N;i++){const v=G.cells[i],[x,y]=G.ctr[i],f=i==G.fx?' pop':'',el=$('#h'+i);
+el.innerHTML=`<polygon points="${G.pts[i]}" class="${G.bl[i]?'bk':''}"/>`+(v?`<circle cx="${x}" cy="${y}" r="13" class="st s${v}${f}"/>`:'')+(G.rmv&&G.rmv.i==i?`<circle cx="${x}" cy="${y}" r="13" class="st s${G.rmv.p} out"/>`:'')+(G.sh[i]?`<circle cx="${x}" cy="${y}" r="17" class="st shd${f}"/>`:'')+(G.bl[i]?`<text x="${x}" y="${y+4}" class="bt">${G.bl[i]}</text>`:'')}}
+function ab(k){if(G.over)return;if(!G.ab[G.t][k])return bad(null,`No ${k[0].toUpperCase()+k.slice(1)} uses remaining`);G.act=G.act==k?null:k;render()}
+function hClick(i){if(G.over)return;const p=G.t+1,o=3-p,a=G.act,v=G.cells[i],A=G.ab[G.t],el=$('#h'+i);let e='',pl=0;
+if(!a){if(v)e='Cell already occupied';else if(G.bl[i])e='That cell is blocked';else{G.cells[i]=p;pl=1}}
+else if(a=='block'){if(v)e='Block needs an empty cell';else if(G.bl[i])e='Cell is already blocked';else{G.bl[i]=3;A.block=0}}
+else if(a=='remove'){if(v!=o)e=v?'You cannot remove your own stone':'Select an opponent stone';else if(G.sh[i])e='This stone is shielded';else{G.cells[i]=0;A.remove=0;G.rmv={i,p:o}}}
+else if(a=='shield'){if(v!=p)e='Select one of your own stones';else if(G.sh[i])e='Already shielded';else{G.sh[i]=1;A.shield=0}}
+if(e)return bad(el,e);G.fx=i;
+if(pl){const w=hexWin(p);if(w){G.fx=-1;hRender();return fin(p-1,'Connection complete',w)}}
+next()}
+/* quoridor */
+const H0=(r,c)=>G.H[r]&&G.H[r][c],V0=(r,c)=>G.V[r]&&G.V[r][c];
+function blk(r,c,dr,dc){const R=r+dr,C=c+dc;if(R<0||C<0||R>8||C>8)return 1;
+return dr?(dr>0?H0(r,c)||H0(r,c-1):H0(r-1,c)||H0(r-1,c-1)):(dc>0?V0(r,c)||V0(r-1,c):V0(r,c-1)||V0(r-1,c-1))}
+function moves(t){const p=G.pw[t],q=G.pw[1-t],out=[];for(const[dr,dc]of K){if(blk(p.r,p.c,dr,dc))continue;const r=p.r+dr,c=p.c+dc;
+if(r==q.r&&c==q.c){if(!blk(r,c,dr,dc))out.push([r+dr,c+dc]);else for(const[a,b]of dr?[[0,1],[0,-1]]:[[1,0],[-1,0]])if(!blk(r,c,a,b))out.push([r+a,c+b])}else out.push([r,c])}return out}
+function reach(t){const s=G.pw[t],g=t?8:0,seen=new Set([s.r*9+s.c]),q=[[s.r,s.c]];
+for(const[r,c]of q){if(r==g)return 1;for(const[a,b]of K)if(!blk(r,c,a,b)){const k=(r+a)*9+c+b;if(!seen.has(k)){seen.add(k);q.push([r+a,c+b])}}}return 0}
+function canWall(o,r,c){const W=G[o],X=o=='H'?G.V:G.H;if(G.wl[G.t]<1)return'No walls remaining';
+if(W[r][c]||X[r][c]||(o=='H'?W[r][c-1]||W[r][c+1]:(W[r-1]&&W[r-1][c])||(W[r+1]&&W[r+1][c])))return'Invalid wall placement: overlaps another wall';
+W[r][c]=1;const ok=reach(0)&&reach(1);W[r][c]=0;return ok?'':'Invalid wall placement: it would block every path'}
+const ga=(o,r,c)=>o=='H'?`${2*r+2}/${2*c+1}/${2*r+3}/${2*c+4}`:`${2*r+1}/${2*c+2}/${2*r+4}/${2*c+3}`;
+function qBuild(){let h='';for(let r=0;r<9;r++)for(let c=0;c<9;c++)h+=`<div class="qc" id="c${r}${c}" style="grid-area:${2*r+1}/${2*c+1};animation-delay:${Math.hypot(r-4,c-4)*60}ms" onclick="qc('m',${r},${c})"></div>`;
+for(let r=0;r<8;r++)for(let c=0;c<9;c++)h+=`<i class="sp" style="grid-area:${2*r+2}/${2*c+1}" onmouseenter="gh('H',${r},${Math.min(c,7)})" onclick="qc('H',${r},${Math.min(c,7)})"></i>`;
+for(let r=0;r<9;r++)for(let c=0;c<8;c++)h+=`<i class="sp" style="grid-area:${2*r+1}/${2*c+2}" onmouseenter="gh('V',${Math.min(r,7)},${c})" onclick="qc('V',${Math.min(r,7)},${c})"></i>`;
+$('#bd').innerHTML=`<div class="qb" id="qb" onmouseleave="$('#gh').style.display='none'">${h}<b class="w gh" id="gh" style="display:none"></b></div>`}
+function qRender(){const m=G.qm=='move'&&!G.over?moves(G.t):[];$('#qb').classList.toggle('wm',G.qm=='wall');
+for(let r=0;r<9;r++)for(let c=0;c<9;c++){const e=$(`#c${r}${c}`),p=G.pw.findIndex(q=>q.r==r&&q.c==c);e.className='qc'+(m.some(x=>x[0]==r&&x[1]==c)?' mv':'');e.innerHTML=p>=0?`<div class="pw" style="background:${CL[p]};box-shadow:0 0 10px ${CL[p]}"></div>`:''}
+document.querySelectorAll('#qb .w:not(.gh)').forEach(e=>e.remove());let h='';
+for(const o of['H','V'])G[o].forEach((row,r)=>row.forEach((v,c)=>{if(v)h+=`<b class="w" style="grid-area:${ga(o,r,c)}"></b>`}));$('#qb').insertAdjacentHTML('beforeend',h);$('#gh').style.display='none'}
+function qm(m){G.qm=m;render()}
+function gh(o,r,c){if(G.qm!='wall'||G.over)return;const e=$('#gh');e.style.display='block';e.style.gridArea=ga(o,r,c);e.classList.toggle('bad',!!canWall(o,r,c))}
+function qc(k,a,b){if(G.over)return;
+if(k=='m'){if(G.qm!='move')return;if(!moves(G.t).some(m=>m[0]==a&&m[1]==b))return bad($(`#c${a}${b}`),'Invalid move: choose a highlighted square');
+G.pw[G.t]={r:a,c:b};if(a==(G.t?8:0)){qRender();return fin(G.t,'Reached the far side of the board')}return next()}
+if(G.qm!='wall')return;const e=canWall(k,a,b);if(e)return bad($('#gh'),e);G[k][a][b]=1;G.wl[G.t]--;next()}
+</script></body></html>
