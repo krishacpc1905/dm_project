@@ -6,7 +6,7 @@ A browser-based collection of three two-player strategy games — **Quoridor**, 
 
 The whole app is a **single HTML file** with no frameworks, no build step and no dependencies.
 
-**Live demo:** `https://<your-username>.github.io/<repo-name>/` *(after enabling GitHub Pages, see [Deploying](#deploying-with-github-pages))*
+**Live demo:** `https://krishacpc1905.github.io/dm_project/index.html` 
 
 ---
 
